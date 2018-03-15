@@ -1,5 +1,5 @@
+package thiagohjr.problemaProdutorConsumidor.logica;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Comprador implements Runnable {
 
@@ -14,13 +14,12 @@ public class Comprador implements Runnable {
 
 	@Override
 	public void run() {
-		Random r = new Random();
 		Mercado mercado;
 		while(true) {
 			try {
-				mercado = mercados.get(r.nextInt(mercados.size()));
-				while(!mercado.fornecer(r.nextInt(mercado.getEstoque() + 1) + 1));
-				Thread.sleep(r.nextInt(maxEspera - minEspera) + minEspera + 1);
+				mercado = mercados.get(Main.geradorInteiros(mercados.size()));
+				while(!mercado.fornecer(Main.geradorInteiros(mercado.getEstoque()+1)));
+				Thread.sleep(Main.geradorInteiros(minEspera, maxEspera));
 			}catch (InterruptedException e) {
 				e.printStackTrace();
 			}

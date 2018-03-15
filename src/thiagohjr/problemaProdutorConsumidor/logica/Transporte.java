@@ -1,3 +1,4 @@
+package thiagohjr.problemaProdutorConsumidor.logica;
 
 public class Transporte implements Runnable, Comparable<Transporte>{
 

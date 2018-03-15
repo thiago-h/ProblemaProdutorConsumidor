@@ -1,6 +1,8 @@
+package thiagohjr.problemaProdutorConsumidor.logica;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 
 public class Armazem {
 	private int capacidade;
@@ -13,9 +15,9 @@ public class Armazem {
 	private ReadLock lockLeitura = lock.readLock();
 	private WriteLock lockEscrita = lock.writeLock();
 
+
 	public Armazem(int capacidade) {
 		this.capacidade = capacidade;
-		this.estoque = 0;
 	}
 	
 	boolean armazenar(int quantidade){

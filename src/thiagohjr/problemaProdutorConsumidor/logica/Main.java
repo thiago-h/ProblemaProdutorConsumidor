@@ -1,3 +1,4 @@
+package thiagohjr.problemaProdutorConsumidor.logica;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -5,12 +6,14 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
+	static Random r = new Random();
+
 	public static void main(String[] args) {
 		int numMercados = 3;
 		int numCompradores = 50;
 		int numProdutores = 10;
 		
-		Random r = new Random();
+		
 		
 		ArrayList<Mercado> mercados = new ArrayList<Mercado>();
 		ArrayList<Comprador> compradores = new ArrayList<Comprador>();
@@ -38,17 +41,28 @@ public class Main {
 						+ "\t\t Saldo: " + (armazem.getArmazenado() - armazem.getEstoque() - armazem.getEntregue()) + "\n");
 			for(int i = 0; i < numMercados; i++) {
 				System.out.println("Mercado " + i + ": " + mercados.get(i).getEstoque() 
-						+ "\t\t Vendas: " + mercados.get(i).getVendas() + "\t\t Abastecimento: " + mercados.get(i).getAbastecimento() 
-						+ "\t\t Saldo: " + (mercados.get(i).getAbastecimento() - mercados.get(i).getVendas() - mercados.get(i).getEstoque()));
+						+ "\t\t Vendas: " + mercados.get(i).getEntregue() + "\t\t Abastecimento: " + mercados.get(i).getArmazenado() 
+						+ "\t\t Saldo: " + (mercados.get(i).getArmazenado() - mercados.get(i).getEntregue() - mercados.get(i).getEstoque()));
 			}
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
 		
+	}
+	
+	public static int geradorInteiros() {
+		return r.nextInt();
+	}
+	
+	public static int geradorInteiros(int valor) {
+		return r.nextInt(valor);
+	}
+	
+	public static int geradorInteiros(int valorMin, int valorMax) {
+		return r.nextInt(valorMax - valorMin) + valorMin + 1;
 	}
 
 }

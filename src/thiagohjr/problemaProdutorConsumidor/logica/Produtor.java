@@ -1,4 +1,4 @@
-import java.util.Random;
+package thiagohjr.problemaProdutorConsumidor.logica;
 
 public class Produtor implements Runnable {
 
@@ -19,9 +19,8 @@ public class Produtor implements Runnable {
 	@Override
 	public void run() {
 		int producao;
-		Random r = new Random();
 		while(true) {
-			producao = r.nextInt(maxProducao - minProducao) + this.minProducao + 1;
+			producao = Main.geradorInteiros(minProducao, maxProducao);
 			while(!this.armazem.armazenar(producao)) {
 				try {
 					Thread.sleep(1000);
