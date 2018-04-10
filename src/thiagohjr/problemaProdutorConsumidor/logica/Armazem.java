@@ -1,4 +1,6 @@
 package thiagohjr.problemaProdutorConsumidor.logica;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -8,6 +10,8 @@ public class Armazem {
 	private int capacidade;
 	private int estoque;
 	
+	private Map<String, Integer> produtos = new HashMap<>();
+	
 	private int armazenado;
 	private int entregue;
 	
@@ -16,16 +20,20 @@ public class Armazem {
 	private WriteLock lockEscrita = lock.writeLock();
 
 
-	public Armazem(int capacidade) {
+	public Armazem(int capacidade, String[] produtos) {
 		this.capacidade = capacidade;
+		for (String string : produtos) {
+			getProdutos().put(string, 0);
+		}
 	}
 	
-	boolean armazenar(int quantidade){
+	boolean armazenar(int quantidade, String produto){
 		lockEscrita.lock();
 		try {
-			if(estoque + quantidade <= capacidade) {
+			if(estoque + quantidade < capacidade) {
 				estoque += quantidade;
 				armazenado += quantidade;
+				produtos.compute(produto, (k, v) -> v + quantidade);
 			}else {
 				return false;
 			}
@@ -35,19 +43,19 @@ public class Armazem {
 		return true;
 	}
 	
-	boolean fornecer(int quantidade){
+	boolean fornecer(int quantidade, String produto){
 		lockEscrita.lock();
 		try {
-			if(estoque - quantidade >=0) {
+			if(produtos.get(produto) - quantidade >= 0) {
 				estoque -= quantidade;
 				entregue += quantidade;
-			}else {
-				return false;
+				produtos.compute(produto, (k, v) -> v - quantidade);
+				return true;
 			}
 		}finally {
 			lockEscrita.unlock();
 		}
-		return true;
+		return false;
 	}
 	
 	
@@ -70,5 +78,16 @@ public class Armazem {
 		}finally {
 			lockLeitura.unlock();
 		}
+	}
+
+	public final Map<String, Integer> getProdutos() {
+		return produtos;
+	}
+	
+	@Override
+	public String toString() {
+		return "\n\nArmazem: " + produtos + "\tTotal: " + getEstoque() 
+		+ "\t\t Entregas: " + getEntregue() + "\t\t Recebimentos: " + getArmazenado() 
+		+ "\t\t Saldo: " + (getArmazenado() - getEstoque() - getEntregue()) + "\n";
 	}
 }

@@ -1,11 +1,16 @@
 package thiagohjr.problemaProdutorConsumidor.logica;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import thiagohjr.problemaProdutorConsumidor.aplicacao.Main;
+
 public class Mercado extends Armazem implements Runnable{
-	private final int maxDistancia = 1000;
-	private final int minDistancia = 100;
+	private final int maxDistancia = 3000;
+	private final int minDistancia = 1000;
 
 	private final int maxVelocidadeTransporte = 120;
 	private final int minVelocidadeTransporte = 60;
@@ -22,13 +27,14 @@ public class Mercado extends Armazem implements Runnable{
 	private int numTransportes;
 	private ArrayList<Transporte> transportes = new ArrayList<Transporte>();
 	
+	Transporte transporte;
 	
 	Armazem armazem;
 	
 	ExecutorService e;
 
-	public Mercado(int capacidade, int numTransportes, Armazem armazem) {
-		super(capacidade);
+	public Mercado(int capacidade, int numTransportes, Armazem armazem, String[] produtos) {
+		super(capacidade,produtos);
 		this.numTransportes = numTransportes;
 		this.armazem = armazem;
 		this.distanciaArmazem = Main.geradorInteiros(minDistancia, maxDistancia);
@@ -39,7 +45,7 @@ public class Mercado extends Armazem implements Runnable{
 			velocidade = Main.geradorInteiros(minVelocidadeTransporte, maxVelocidadeTransporte);
 			cargaMaxima = Main.geradorInteiros(minCapacidadeTransporte, maxCapacidadeTransporte);
 			t = new Transporte(velocidade, distanciaArmazem, cargaMaxima, armazem, this);
-			transportes.add(t);			
+			transportes.add(t);
 		}
 		transportes.sort(null);
 	}
@@ -47,15 +53,26 @@ public class Mercado extends Armazem implements Runnable{
 	@Override
 	public void run() {
 		e = Executors.newFixedThreadPool(numTransportes);
-		Transporte transporte;
+		//Transporte transporte;
 		while(true) {
-			if(this.getEstoque() < getCapacidade() * estoqueCritico) {
+			Set<Map.Entry<String, Integer>> produtos = this.getProdutos().entrySet();
+			for (Entry<String, Integer> entry : produtos) {
+				if(entry.getValue() < getCapacidade() * estoqueCritico) {
+					transporte = escolherTransporte();
+					if(transporte != null) {
+						transporte.setQuantidade((Double.valueOf(getCapacidade() * reabastecimento).intValue()));
+						transporte.setProduto(entry.getKey());
+						e.execute(transporte);
+					}
+				}
+			}
+			/*if(this.getEstoque() < getCapacidade() * estoqueCritico) {
 				transporte = escolherTransporte();
 				if(transporte != null) {
 					transporte.setQuantidade((Double.valueOf(getCapacidade() * reabastecimento).intValue()));
 					e.execute(transporte);
 				}
-			}
+			}*/
 		}
 	}
 	
@@ -67,6 +84,7 @@ public class Mercado extends Armazem implements Runnable{
 		}
 		if(i < numTransportes) {
 			t = transportes.get(i);
+			t.setDisponivel(false);
 		}
 		return t;
 	}
@@ -86,5 +104,12 @@ public class Mercado extends Armazem implements Runnable{
 
 	public final Armazem getArmazem() {
 		return armazem;
+	}
+	
+	@Override
+	public String toString() {
+		return "Mercado: " + getProdutos() + "\tTotal: " + getEstoque() 
+				+ "\t\t Vendas: " + getEntregue() + "\t\t Abastecimento: " + getArmazenado() 
+				+ "\t\t Saldo: " + (getArmazenado() - getEntregue() - getEstoque()) + "\tTransportes: " + transportes.toString();
 	}
 }

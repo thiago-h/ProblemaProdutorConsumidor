@@ -1,5 +1,6 @@
 package thiagohjr.problemaProdutorConsumidor.logica;
 
+
 public class Transporte implements Runnable, Comparable<Transporte>{
 
 	private int velocidade;
@@ -7,11 +8,14 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	private int cargaMaxima;
 	
 	private int quantidade;
+	private String produto;
 	
 	private volatile boolean disponivel;
 	
-	Armazem armazem;
-	Mercado mercado;
+	private Armazem armazem;
+	private Mercado mercado;
+	
+	private volatile boolean carregado;
 
 	public Transporte(int velocidade, int distancia, int cargaMaxima, Armazem armazem, Mercado mercado) {
 		this.velocidade = velocidade;
@@ -20,24 +24,32 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 		this.armazem = armazem;
 		this.mercado = mercado;
 		this.disponivel = true;
+		this.carregado = false;
 	}
 	
 	@Override
 	public void run() {
 		try {
-			disponivel = false;
+			//System.out.println("Transporte" + this.toString() + "\tbuscando " + produto + ": " + quantidade);
 			Thread.sleep(distancia/velocidade);
-			while(!armazem.fornecer(quantidade)){
+			while(!armazem.fornecer(quantidade,produto)){
+				int disponivel = armazem.getProdutos().get(produto);
+				if(armazem.fornecer(disponivel, produto)) {
+					quantidade -= disponivel;
+				}
 				Thread.sleep(1000);
 			}
+			carregado = true;
 			Thread.sleep(distancia/velocidade);
-			while(!mercado.armazenar(quantidade)){
+			while(!mercado.armazenar(quantidade,produto)){
 				Thread.sleep(1000);
 			}
+			carregado = false;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}finally {
 			disponivel = true;
+			//System.out.println("Transporte" + this.toString() + "\tentregou " + produto + ": " + quantidade);
 		}
 	}
 
@@ -72,11 +84,24 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	public final void setQuantidade(int quantidade) {
 		this.quantidade = quantidade;
 	}
+	
+	public final void setProduto(String produto) {
+		this.produto = produto;
+	}
+
+	public final void setDisponivel(boolean disponivel) {
+		this.disponivel = disponivel;
+	}
 
 	@Override
 	public int compareTo(Transporte t) {
 		Integer velocidade = this.velocidade;
 		return velocidade.compareTo(t.velocidade);
+	}
+	
+	@Override
+	public String toString() {
+		return "Disponível: " + disponivel + " " + (disponivel ? "" : (carregado ? "Carregado com: " : "Buscando: ") + quantidade + " " + produto);
 	}
 
 }
