@@ -12,7 +12,7 @@ public class Produtor implements Runnable {
 	
 	private Armazem armazem;
 
-	public Produtor(int maxProducao, int minProducao, int tempoProducao, Armazem armazem, String produto) {
+	public Produtor(int minProducao, int maxProducao, int tempoProducao, Armazem armazem, String produto) {
 		this.maxProducao = maxProducao;
 		this.minProducao = minProducao;
 		this.tempoProducao = tempoProducao;
@@ -26,7 +26,6 @@ public class Produtor implements Runnable {
 		int producao;
 		while(true) {
 			producao = Main.geradorInteiros(minProducao, maxProducao);
-			//System.out.println(this + "\t" + produto + "\t" + producao);
 			while(!this.armazem.armazenar(producao, produto)) {
 				if(this.armazem.getProdutos().get(produto) == 0) {
 					int disponivel = armazem.getCapacidade() - armazem.getEstoque() - 1;

@@ -5,15 +5,21 @@ import thiagohjr.problemaProdutorConsumidor.aplicacao.Main;
 
 public class Comprador implements Runnable {
 
-	private final int minEspera = 5000;
-	private final int maxEspera = 10000;
+	private int minEspera;
+	private int maxEspera;
 	
 	
 	private ArrayList<Mercado> mercados = new ArrayList<Mercado>();
 	
-	public Comprador(ArrayList<Mercado> mercados) {
+	
+
+	public Comprador(int minEspera, int maxEspera, ArrayList<Mercado> mercados) {
+		this.minEspera = minEspera;
+		this.maxEspera = maxEspera;
 		this.mercados = mercados;
 	}
+
+
 
 	@Override
 	public void run() {
@@ -29,5 +35,4 @@ public class Comprador implements Runnable {
 			}
 		}
 	}
-
 }

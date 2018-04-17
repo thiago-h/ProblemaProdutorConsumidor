@@ -17,10 +17,10 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	
 	private volatile boolean carregado;
 
-	public Transporte(int velocidade, int distancia, int cargaMaxima, Armazem armazem, Mercado mercado) {
+	public Transporte(int velocidade, int cargaMaxima, int distancia, Armazem armazem, Mercado mercado) {
 		this.velocidade = velocidade;
-		this.distancia = distancia;
 		this.cargaMaxima = cargaMaxima;
+		this.distancia = distancia;
 		this.armazem = armazem;
 		this.mercado = mercado;
 		this.disponivel = true;
@@ -30,7 +30,6 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	@Override
 	public void run() {
 		try {
-			//System.out.println("Transporte" + this.toString() + "\tbuscando " + produto + ": " + quantidade);
 			Thread.sleep(distancia/velocidade);
 			while(!armazem.fornecer(quantidade,produto)){
 				int disponivel = armazem.getProdutos().get(produto);
@@ -44,12 +43,10 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 			while(!mercado.armazenar(quantidade,produto)){
 				Thread.sleep(1000);
 			}
-			carregado = false;
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}finally {
 			disponivel = true;
-			//System.out.println("Transporte" + this.toString() + "\tentregou " + produto + ": " + quantidade);
 		}
 	}
 
@@ -92,6 +89,9 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	public final void setDisponivel(boolean disponivel) {
 		this.disponivel = disponivel;
 	}
+	public final void setCarregado(boolean carregado) {
+		this.carregado = carregado;
+	}
 
 	@Override
 	public int compareTo(Transporte t) {
@@ -101,7 +101,7 @@ public class Transporte implements Runnable, Comparable<Transporte>{
 	
 	@Override
 	public String toString() {
-		return "Disponível: " + disponivel + " " + (disponivel ? "" : (carregado ? "Carregado com: " : "Buscando: ") + quantidade + " " + produto);
+		return (disponivel ? "Disponivel" : (carregado ? "Carregado com: " : "Buscando: ") + quantidade + " " + produto);
 	}
 
 }

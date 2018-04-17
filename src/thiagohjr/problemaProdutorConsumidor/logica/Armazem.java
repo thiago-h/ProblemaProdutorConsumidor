@@ -1,6 +1,6 @@
 package thiagohjr.problemaProdutorConsumidor.logica;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
@@ -10,7 +10,7 @@ public class Armazem {
 	private int capacidade;
 	private int estoque;
 	
-	private Map<String, Integer> produtos = new HashMap<>();
+	private Map<String, Integer> produtos = new TreeMap<>();
 	
 	private int armazenado;
 	private int entregue;

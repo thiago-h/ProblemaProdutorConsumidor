@@ -6,22 +6,10 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import thiagohjr.problemaProdutorConsumidor.aplicacao.Main;
-
 public class Mercado extends Armazem implements Runnable{
-	private final int maxDistancia = 3000;
-	private final int minDistancia = 1000;
-
-	private final int maxVelocidadeTransporte = 120;
-	private final int minVelocidadeTransporte = 60;
-
-	private final int maxCapacidadeTransporte = 120;
-	private final int minCapacidadeTransporte = 60;
 	
-	private final double estoqueCritico = 0.2;
-	private final double reabastecimento = 0.3;
-	
-	
+	private double estoqueCritico;
+	private double reabastecimento;
 	
 	private int distanciaArmazem;
 	private int numTransportes;
@@ -33,18 +21,17 @@ public class Mercado extends Armazem implements Runnable{
 	
 	ExecutorService e;
 
-	public Mercado(int capacidade, int numTransportes, Armazem armazem, String[] produtos) {
+	public Mercado(double estoqueCritico, double reabastecimento, int capacidade, int numTransportes, Armazem armazem, 
+			String[] produtos, int distanciaArmazem, Integer[] velocidadeTransporte, Integer[] capacidadeTransporte) {
 		super(capacidade,produtos);
+		this.estoqueCritico = estoqueCritico;
+		this.reabastecimento = reabastecimento;
 		this.numTransportes = numTransportes;
 		this.armazem = armazem;
-		this.distanciaArmazem = Main.geradorInteiros(minDistancia, maxDistancia);
-		int velocidade;
-		int cargaMaxima;
+		this.distanciaArmazem = distanciaArmazem;
 		Transporte t;
 		for(int i = 0; i < numTransportes; i++) {
-			velocidade = Main.geradorInteiros(minVelocidadeTransporte, maxVelocidadeTransporte);
-			cargaMaxima = Main.geradorInteiros(minCapacidadeTransporte, maxCapacidadeTransporte);
-			t = new Transporte(velocidade, distanciaArmazem, cargaMaxima, armazem, this);
+			t = new Transporte(velocidadeTransporte[i], capacidadeTransporte[i], distanciaArmazem, armazem, this);
 			transportes.add(t);
 		}
 		transportes.sort(null);
@@ -60,19 +47,13 @@ public class Mercado extends Armazem implements Runnable{
 				if(entry.getValue() < getCapacidade() * estoqueCritico) {
 					transporte = escolherTransporte();
 					if(transporte != null) {
-						transporte.setQuantidade((Double.valueOf(getCapacidade() * reabastecimento).intValue()));
+						int quantidade = (Double.valueOf(getCapacidade() * reabastecimento).intValue());
+						transporte.setQuantidade((quantidade <= transporte.getCargaMaxima() ? quantidade : transporte.getCargaMaxima()));
 						transporte.setProduto(entry.getKey());
 						e.execute(transporte);
 					}
 				}
 			}
-			/*if(this.getEstoque() < getCapacidade() * estoqueCritico) {
-				transporte = escolherTransporte();
-				if(transporte != null) {
-					transporte.setQuantidade((Double.valueOf(getCapacidade() * reabastecimento).intValue()));
-					e.execute(transporte);
-				}
-			}*/
 		}
 	}
 	
@@ -84,6 +65,8 @@ public class Mercado extends Armazem implements Runnable{
 		}
 		if(i < numTransportes) {
 			t = transportes.get(i);
+			//System.out.println(t);
+			t.setCarregado(false);
 			t.setDisponivel(false);
 		}
 		return t;
